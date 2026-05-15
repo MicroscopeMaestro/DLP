@@ -9,14 +9,13 @@ clr.AddReference("DLPComposer.IO")
 from dlpc342x.commands import *
 from DLPComposer.IO import UARTInterface
 from DLPComposer.IO.DLPC34xx import UARTCommandInterface
-from DLPComposer.Commands.DLPC342x import Command, FlashDataTypeSelect, ImageCurtainEnable, Color as DLPColor, BorderEnable
+from DLPComposer.Commands.DLPC342x import Command, FlashDataTypeSelect
 
-FIRMWARE_PATH = r"C:\Users\Juan\Desktop\dlpc34xx_firmware\FWSel_DLPC3421_DLPA2000_pm1_i2c0x36_v1p1p1.img"
+FIRMWARE_PATH = r"C:\Users\Juan\Desktop\dlpc34xx_firmware\FWSel_DLPC3421_DLPA2005_pm1_i2c0x36_v1p1p1.img"
 PORT_NAME = "COM4"
-BLOCK_SIZE = 512
 
-def force_unlock_flash():
-    print("--- STARTING FORCE-UNLOCK FLASH ---", flush=True)
+def remote_software_recovery():
+    print("--- STARTING REMOTE-ONLY SOFTWARE RECOVERY ---", flush=True)
     
     uart = UARTInterface("UART")
     try:
@@ -29,65 +28,64 @@ def force_unlock_flash():
         return
 
     try:
-        # 1. PRE-RESET to clear any latched error states
-        print("Resetting controller before flash...", flush=True)
-        try: WriteExecuteFlashBatchFile(0)
+        # 1. Trigger "Soft-Hard" Reset by pulsing the bridge
+        print("Pulsing UART bridge to trigger MSPM0 reset sequence...", flush=True)
+        # We try to toggle the DTR/RTS which on some TI boards is tied to PROJ_ON/RESET
+        try:
+            port.BasePort.DtrEnable = True
+            time.sleep(0.5)
+            port.BasePort.DtrEnable = False
+            time.sleep(1.0)
         except: pass
-        time.sleep(5)
-        
-        # 2. Initialization (using full ENTIRE FLASH range)
-        print("Initializing Update (EntireFlash)...", flush=True)
+
+        # 2. Force the controller to "Ready" state
+        print("Readying flash engine...", flush=True)
         WriteFlashDataTypeSelect(FlashDataTypeSelect.EntireFlash)
         
-        # 3. Targeted Erase
-        print("Performing CHIP ERASE (90s wait)...", flush=True)
+        # 3. VERIFY READ (Checking if 0x00 is persistent)
+        _, d = ReadFlashStart(16)
+        print(f"Current Flash Header: {list(d)}", flush=True)
+
+        # 4. If all zeros, try a "Format-Erase" loop
+        if all(b == 0 for b in d):
+            print("Detected 0x00 Lock. Attempting to force bit-flip...", flush=True)
+            # We try to write 0xFF without an erase to see if the bits are actually 0xFF but reading 0
+            try:
+                WriteFlashStart([255]*512)
+                time.sleep(1)
+                _, d2 = ReadFlashStart(16)
+                print(f"Header after 0xFF write attempt: {list(d2)}", flush=True)
+            except: pass
+
+        # 5. Full Erase + Upload
+        print("\nStarting Deep Chip Erase (90s)...", flush=True)
         WriteFlashErase()
         for i in range(9):
             time.sleep(10)
             print(f"  Erasing... {90 - (i+1)*10}s remaining", flush=True)
 
-        # 4. Final verification of Erase
-        print("\nVerifying erase...", flush=True)
-        _, d = ReadFlashStart(16)
-        print(f"  Flash Header (Should be 255): {list(d)}", flush=True)
-        
-        if all(b == 255 for b in d):
-            print("  ERASE SUCCESSFUL! Starting upload...", flush=True)
-        else:
-            print("  ERASE FAILED - Flash is still locked at 0x00.", flush=True)
-            print("  Continuing anyway to see if writing 0x00 works (Safe for testing)...", flush=True)
-
-        # 5. Upload
+        print("\nStarting Upload (512B blocks)...", flush=True)
         with open(FIRMWARE_PATH, "rb") as f:
             data = f.read()
-        total_blocks = (len(data) + BLOCK_SIZE - 1) // BLOCK_SIZE
-        print(f"\nUploading {total_blocks} blocks...", flush=True)
+        
+        WriteFlashStart(list(data[0:512]))
+        for i in range(1, (len(data)+511)//512):
+            WriteFlashContinue(list(data[i*512:min((i+1)*512, len(data))]))
+            if i % 500 == 0:
+                print(f"  Progress: {i*512/len(data)*100:.1f}%", flush=True)
 
-        first_block = list(data[0:min(BLOCK_SIZE, len(data))])
-        WriteFlashStart(first_block)
-
-        for i in range(1, total_blocks):
-            start = i * BLOCK_SIZE
-            end = min(start + BLOCK_SIZE, len(data))
-            WriteFlashContinue(list(data[start:end]))
-            
-            if i % 100 == 0:
-                # No status checks here to avoid transient errors clearing
-                progress = (i + 1) / total_blocks * 100
-                print(f"  Progress: {progress:.1f}% ({i+1}/{total_blocks})", flush=True)
-
-        print("\nUpload Complete. Rebooting...", flush=True)
+        print("\nUpload complete. Triggering MainApp jump...", flush=True)
         WriteExecuteFlashBatchFile(0)
-        time.sleep(15)
-
-        _, status = ReadShortStatus()
-        print(f"Final Status: App={status.Application}", flush=True)
+        time.sleep(5)
+        
+        _, s = ReadShortStatus()
+        print(f"Final Status: App={s.Application}", flush=True)
 
     except Exception as e:
-        print(f"\nCRITICAL ERROR: {e}", flush=True)
+        print(f"Error: {e}", flush=True)
     finally:
         port.Disconnect()
         print("Disconnected.", flush=True)
 
 if __name__ == "__main__":
-    force_unlock_flash()
+    remote_software_recovery()
