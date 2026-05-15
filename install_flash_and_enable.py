@@ -9,9 +9,9 @@ clr.AddReference("DLPComposer.IO")
 from dlpc342x.commands import *
 from DLPComposer.IO import UARTInterface
 from DLPComposer.IO.DLPC34xx import UARTCommandInterface
-from DLPComposer.Commands.DLPC342x import Command, FlashDataTypeSelect, ImageCurtainEnable, Color as DLPColor, BorderEnable
+from DLPComposer.Commands.DLPC342x import Command, FlashDataTypeSelect, ImageCurtainEnable, Color as DLPColor, BorderEnable, OperatingMode
 
-FIRMWARE_PATH = r"C:\Users\Juan\Desktop\dlpc34xx_firmware\FWSel_DLPC3421_DLPA2000_pm1_i2c0x36_v1p1p1.img"
+FIRMWARE_PATH = r"C:\Users\Juan\Desktop\dlpc34xx_firmware\FWSel_DLPC3421_DLPA2005_pm1_i2c0x36_v1p1p1.img"
 PORT_NAME = "COM4"
 BLOCK_SIZE = 512
 
@@ -82,6 +82,27 @@ def force_unlock_flash():
 
         _, status = ReadShortStatus()
         print(f"Final Status: App={status.Application}", flush=True)
+
+        # 6. Setup LEDs and Enable Light
+        print("\n--- ENABLING LIGHT ---", flush=True)
+        print("Switching to TestPatternGenerator...", flush=True)
+        WriteOperatingModeSelect(OperatingMode.TestPatternGenerator)
+        time.sleep(0.5)
+
+        print("Powering on LEDs (Red=300, Green=300, Blue=300)...", flush=True)
+        WriteRgbLedCurrent(300, 300, 300)
+        WriteRgbLedEnable(True, True, True)
+        time.sleep(0.3)
+
+        print("Lifting the Image Curtain...", flush=True)
+        WriteDisplayImageCurtain(ImageCurtainEnable.Disable, DLPColor.Black)
+        time.sleep(0.3)
+
+        print("Projecting Solid White block...", flush=True)
+        WriteSolidField(BorderEnable(0), DLPColor.White)
+
+        print("\nCHECK FOR LIGHT NOW!", flush=True)
+        time.sleep(5)
 
     except Exception as e:
         print(f"\nCRITICAL ERROR: {e}", flush=True)
