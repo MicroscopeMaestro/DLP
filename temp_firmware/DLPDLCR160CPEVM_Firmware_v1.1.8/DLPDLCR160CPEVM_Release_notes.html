@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Meta data -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+		<title>Release Notes</title>
+		
+		<!-- Bootstrap Components -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- Some TI written CSS to customize the page -->
+		<style>
+			.navbar-inverse {
+				background-color: #c00000;
+				border-color: #c00000;
+			}
+			.navbar-inverse .navbar-brand {
+				color:  white;
+			}
+			.navbar-inverse .navbar-nav li a {
+				color:  white;
+			}
+			footer a {
+				color: black;
+			}
+			hr {
+				margin-top: 0em;
+				margin-bottom: 0em;
+			}
+			table {
+			  font-family: arial, sans-serif;
+			  border-collapse: collapse;
+			  width: 100%;
+			}
+
+			td, th {
+			  border: 1px solid #dddddd;
+			  text-align: left;
+			  padding: 8px;
+			}
+			
+		</style>
+
+	</head>
+
+
+	<body>
+		<nav class="navbar navbar-inverse">
+			<div class="container">
+				<div class="navbar-header">
+					<!--<img src="ti_logo.png" alt="" height="32" width="32">-->
+					<a class="navbar-brand" href="http://www.ti.com">Texas Instruments</a> 
+				</div>
+
+				<div class="collapse navbar-collapse" id="myNavbar">
+
+					<ul class="nav navbar-nav navbar-right">
+							<li><a href="http://www.ti.com/dlp-chip/display-and-projection/pico-chipsets/overview.html"> DLP&reg; Pico&trade; Products</a></li>
+
+							<li><a href="http://www.ti.com/dlp-chip/overview.html">DLP Home</a></li>
+					</ul>
+					
+				</div>
+			</div>
+		</nav>
+
+		<div class="container">
+			<h2 align="center" id="title">DLPDLCR160CPEVM Firmware v1.1.8 Release Notes</h2>
+			<h4 align="center" id="date">May 13, 2024</h4>
+			<h3>Table of Contents</h3>
+			<hr>
+			<br>
+			<ul>
+				<li><a href="#overview">Overview</a></li>
+				<li><a href="#supportedfeatures">New Features and Changes</a></li>
+				<li><a href="#knownissues">Known Issues</a></li>
+				<li><a href="#techsupport">Technical Support and Product Updates</a></li>
+			</ul>
+			<br>
+
+			<h3 id="overview">Overview</h3>
+			<hr>
+			<br>
+			<p>The firmware included in this release is primarily intended for the DLPDLCR160CPEVM, but can be used for any DLPC3421 system with the following configuration:</p>
+			<ul>
+				<li id="firmware_version">Firmware Version: 1.1.8</li>
+				<ul>
+				<li id="esw_version">Embedded Software Version: 1.0.0</li>
+				<li id="composer_version">Generated from DLP Composer Version: 13.19.4</li>
+				</ul>
+				<li id="dmd">DMD: DLP160CP</li>
+				<li id="controller">Controller: DLPC3421</li>
+				<li id="pmic">PMIC: DLPA2005</li>
+
+				
+			</ul>
+			<p>Configuration Settings</p>
+			<ul>
+				<li id="i2c">I<sup>2</sup>C Address: 0x36</li>
+				<li id="pin_map">DMD Pin Mapping: 2</li>
+				<li id="rlim">Rlim value: 180m&#8486;</li>
+				<li id="frame_rate">Optimized Frame Rates: 60 Hz</li>
+				<li>Four 2D looks (cool, medium, warm, and other)</li>
+				<li>Degamma curve using power law 2.2, or linear</li>
+				<li>Default CCA (color coordinate adjustment) of an identity matrix</li> 
+			</ul>
+			<br>
+
+			<h3 id="supportedfeatures">New Features and Changes</h3>
+			<hr>
+			<br>
+			<ul>
+				<li>Digital Serial Interface (DSI)</li>
+				<li>Released Manual Idle Mode</li>
+				<ul>
+					<li>Manual Idle Mode is a power savings feature for use when the input image isn't changing. See <a href="#idledoc">Idle Mode Documentation</a> for more information.</li>
+				</ul>
+
+			<h3 id="knownissues">Known Issues</h3>
+			<hr>
+			<br>
+			<ul>
+				<li>Artifact issues if Splash image 0 is saved as YCrCb format.</li>
+				<li>Linearity issues on ramp Test Pattern Generator.</li>
+				<li>Image Freeze command may disable after source select command is sent.</li>
+				<li>External video requires double execution for reliable operation.</li>
+				<li>Image scaling artifact when image crop set to 320x180.</li>
+				<li>I2C speed is limited to 100 KHz</li>
+				<li>Single Buffer Mode has various limitations. See <a href="#singlebuffdoc">Single Buffer Mode Documentation</a> for more information.</li>
+				<li>Manual Idle mode may be unsuitable for some situations as it takes time to enter and exit the mode. There are additional limitations of sending commands when in idle mode. See <a href="#idledoc">Idle Mode Documentation</a> for more information.</li>
+				<li>DSI support for 320 x 180 up to 60Hz</li>
+				<li>DSI HS_PREP >110ns induces artifacts</li>
+				<li>Splash screen requires double execution for reliable operation</li>
+				<li>When operating with low IDAC values (i.e. low LED currents), non-linearities may occur with the LED currents. This could be optimized with a system level design (i.e. optimizing passives) or by avoiding operation in this region</li>
+				<li>The DMD may not be properly parked if the controller is interrupted during its startup routine.</li>
+			</ul>
+			<br>
+
+			<h3 id="techsupport">Technical Support and Product Updates</h3>
+			<hr>
+			<br>
+			<ul>
+				<li><h4>Additional Links</h4></li>
+				<ul>
+					<li><a href="http://www.ti.com/dlp-chip/display-and-projection/pico-chipsets/overview.html">DLP&reg; Pico&trade; Products overview</a></li>
+					<li><a href="http://e2e.ti.com/support/dlp/f/94">DLP Products E2E Forums</a></li>
+					<li><a href="http://www.ti.com/dlp-chip/getting-started.html">DLP Products - Getting Started</a></li>
+					<li id="controller_folder"><a href="http://www.ti.com/product/DLPC3421">DLPC3421 Controller </a></li>
+					<li id="dmd_folder"><a href="http://www.ti.com/product/DLP160AP">DLP160AP DMD </a></li>
+				</ul>
+			<br>
+		</div>
+
+		
+	</body>
+	<footer id="tiFooter">
+		<br>
+		<br>
+		<div class="container">
+			<p>TI is a global semiconductor design and manufacturing company. Innovate
+			with 100,000+ analog ICs and embedded processors, along with software, tools
+			and the industry‘s largest sales/support staff.</p>
+			<p>
+			<a href="http://www.ti.com/corp/docs/legal/copyright.shtml">© Copyright 1995-2020</a>, Texas Instruments Incorporated. All rights reserved. <br>
+			<a href="http://www.ti.com/corp/docs/legal/trademark/trademrk.htm">Trademarks</a> | <a href="http://www.ti.com/corp/docs/legal/privacy.shtml">Privacy policy</a> | <a href="http://www.ti.com/corp/docs/legal/termsofuse.shtml">Terms of use</a> | <a href="http://www.ti.com/lsds/ti/legal/termsofsale.page">Terms of sale</a>
+			</p>
+		</div>
+	</footer>
+
+
+</html>
