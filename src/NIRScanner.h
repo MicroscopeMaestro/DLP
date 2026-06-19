@@ -41,6 +41,11 @@ public:
     void setLampOnOff(int32_t newValue);
     void setConfig(uint16_t scanConfigIndex, uint8_t scan_type, uint16_t num_patterns, uint16_t num_repeats, 
                    uint16_t wavelength_start_nm, uint16_t wavelength_end_nm, uint8_t width_px); 
+    void setSlewConfigHeader(uint16_t scanConfigIndex, uint16_t num_repeats, uint8_t num_sections);
+    void setSlewConfigSection(uint8_t section_index, uint8_t section_scan_type, uint8_t width_px,
+                              uint16_t wavelength_start_nm, uint16_t wavelength_end_nm,
+                              uint16_t num_patterns, uint16_t exposure_time);
+    void applySlewConfig();
     void configEVM(uScanConfig* pConfig = nullptr);
     void setPGAGain(int32_t newValue);
 

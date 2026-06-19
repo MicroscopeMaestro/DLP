@@ -20,11 +20,11 @@ class NIRS:
 
     def __init__(self):
         self.nirs_obj = new_NIRScanner()
-        atexit.register(self._cleanup)
 
-    def _cleanup(self):
-        print("Cleanning up NIRS instance.")
-        delete_NIRScanner(self.nirs_obj)
+    def __del__(self):
+        if hasattr(self, 'nirs_obj') and self.nirs_obj is not None:
+            delete_NIRScanner(self.nirs_obj)
+            self.nirs_obj = None
 
     def scan_snr(self, scan_type="hadamard"):
         if scan_type == "hadamard":
@@ -86,6 +86,47 @@ class NIRS:
                    wavelength_start_nm=900, wavelength_end_nm=1700, width_px=7):
         return NIRScanner_setConfig(self.nirs_obj, scanConfigIndex, scan_type, num_patterns, num_repeats, 
                                     wavelength_start_nm, wavelength_end_nm, width_px)
+    
+    def set_slew_config_header(self, scanConfigIndex=8, num_repeats=6, num_sections=1):
+        return NIRScanner_setSlewConfigHeader(self.nirs_obj, scanConfigIndex, num_repeats, num_sections)
+
+    def set_slew_config_section(self, section_index, section_scan_type, width_px,
+                                 wavelength_start_nm, wavelength_end_nm, num_patterns, exposure_time):
+        return NIRScanner_setSlewConfigSection(self.nirs_obj, section_index, section_scan_type, width_px,
+                                                wavelength_start_nm, wavelength_end_nm, num_patterns, exposure_time)
+
+    def apply_slew_config(self):
+        return NIRScanner_applySlewConfig(self.nirs_obj)
+
+    def set_slew_config(self, sections, num_repeats=6, scanConfigIndex=8):
+        """
+        Configure device for Slew Scan.
+        sections should be a list of dictionaries, e.g.:
+        [
+            {
+                "scan_type": 1, # Hadamard
+                "width_px": 7,
+                "wavelength_start": 900,
+                "wavelength_end": 1700,
+                "num_patterns": 228,
+                "exposure_time": 1 # e.g. T_1270_US (1.27 ms)
+            }
+        ]
+        """
+        num_sections = min(len(sections), 5)
+        self.set_slew_config_header(scanConfigIndex, num_repeats, num_sections)
+        for idx in range(num_sections):
+            sec = sections[idx]
+            self.set_slew_config_section(
+                idx,
+                int(sec.get("scan_type", 1)),
+                int(sec.get("width_px", 7)),
+                int(sec.get("wavelength_start", 900)),
+                int(sec.get("wavelength_end", 1700)),
+                int(sec.get("num_patterns", 228)),
+                int(sec.get("exposure_time", 1))
+            )
+        self.apply_slew_config()
     
     def set_pga_gain(self, new_value):
         return NIRScanner_setPGAGain(self.nirs_obj, new_value)

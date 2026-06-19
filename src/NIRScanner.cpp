@@ -1,5 +1,6 @@
 #include "NIRScanner.h"
 #include "dlpspec.h"
+#include <cstring>
 
 using namespace std;
 
@@ -211,6 +212,37 @@ void NIRScanner::setConfig(uint16_t scanConfigIndex,  // < Unique ID per spectro
     this->mConfig.scanCfg.wavelength_end_nm = wavelength_end_nm;
     this->mConfig.scanCfg.width_px = width_px;
 
+    this->configEVM();
+}
+
+void NIRScanner::setSlewConfigHeader(uint16_t scanConfigIndex, uint16_t num_repeats, uint8_t num_sections) {
+    this->mConfig.slewScanCfg.head.scan_type = SLEW_TYPE;
+    this->mConfig.slewScanCfg.head.scanConfigIndex = scanConfigIndex;
+    this->mConfig.slewScanCfg.head.num_repeats = num_repeats;
+    this->mConfig.slewScanCfg.head.num_sections = num_sections;
+    strncpy(this->mConfig.slewScanCfg.head.ScanConfig_serial_number, "0000000", NANO_SER_NUM_LEN);
+    strncpy(this->mConfig.slewScanCfg.head.config_name, "Slew Scan Config", SCAN_CFG_FILENAME_LEN);
+    
+    memset(this->mConfig.slewScanCfg.section, 0, sizeof(this->mConfig.slewScanCfg.section));
+}
+
+void NIRScanner::setSlewConfigSection(uint8_t section_index, uint8_t section_scan_type, uint8_t width_px,
+                                     uint16_t wavelength_start_nm, uint16_t wavelength_end_nm,
+                                     uint16_t num_patterns, uint16_t exposure_time) {
+    if (section_index >= SLEW_SCAN_MAX_SECTIONS) {
+        printf("ERROR: Section index %d out of bounds\n", section_index);
+        return;
+    }
+    
+    this->mConfig.slewScanCfg.section[section_index].section_scan_type = section_scan_type;
+    this->mConfig.slewScanCfg.section[section_index].width_px = width_px;
+    this->mConfig.slewScanCfg.section[section_index].wavelength_start_nm = wavelength_start_nm;
+    this->mConfig.slewScanCfg.section[section_index].wavelength_end_nm = wavelength_end_nm;
+    this->mConfig.slewScanCfg.section[section_index].num_patterns = num_patterns;
+    this->mConfig.slewScanCfg.section[section_index].exposure_time = exposure_time;
+}
+
+void NIRScanner::applySlewConfig() {
     this->configEVM();
 }
 

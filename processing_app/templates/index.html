@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLP NIRscan Nano - Spectral Processing Studio</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-chart-area logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Spectral Processing Studio</h1>
+                    <span class="logo-tagline">NIR Chemometric Analysis & Peak Detection</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="badge-status-sec">Chemometrics Engine v1.0</span>
+            </div>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Controls Column -->
+            <section class="controls-column">
+                
+                <!-- File Manager & Uploader Card -->
+                <div class="card glass-card files-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-folder-open text-accent-yellow"></i> Spectra Library</h2>
+                        <button id="btn-refresh-files" class="btn btn-secondary btn-xs" title="Refresh local file list">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Dropzone for CSV uploads -->
+                        <div class="upload-dropzone" id="drop-zone">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <span class="upload-text">Drag & Drop Scan CSV files here</span>
+                            <span class="upload-subtext">or click to upload</span>
+                            <input type="file" id="file-input" accept=".csv" class="hidden">
+                        </div>
+                        
+                        <!-- File Checklist -->
+                        <div class="files-checklist-container">
+                            <span class="section-label">Select Spectra to Analyze (Multi-select)</span>
+                            <div class="files-checklist" id="files-list">
+                                <!-- Dynamically populated list of CSV files -->
+                                <div class="no-files-notice">No spectra files detected. Scan some samples or upload files.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preprocessing Tools Card -->
+                <div class="card glass-card preprocessing-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-wand-magic-sparkles text-accent-purple"></i> Preprocessing Tools</h2>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Baseline Correction Options (Checkboxes) -->
+                        <div class="form-group mb-4">
+                            <span class="section-label">Baseline Correction (Apply Multiple)</span>
+                            <div class="checkbox-group mt-2">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="chk-base-offset" value="offset">
+                                    <span>Offset Subtraction (Zero-min)</span>
+                                </label>
+                                <label class="checkbox-label mt-2">
+                                    <input type="checkbox" id="chk-base-snv" value="snv">
+                                    <span>Standard Normal Variate (SNV)</span>
+                                </label>
+                                <label class="checkbox-label mt-2">
+                                    <input type="checkbox" id="chk-base-minmax" value="minmax">
+                                    <span>Min-Max Normalization (0-1 range)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Smoothing Filter selection -->
+                        <div class="form-group mb-4">
+                            <label for="sel-smoothing">Smoothing Filter</label>
+                            <select id="sel-smoothing" class="form-input">
+                                <option value="none" selected>None</option>
+                                <option value="moving_avg">Moving Average (Boxcar)</option>
+                                <option value="savgol">Savitzky-Golay Filter (Chemometric Std)</option>
+                            </select>
+                        </div>
+
+                        <!-- Savitzky-Golay Settings -->
+                        <div class="smoothing-settings hidden" id="savgol-settings">
+                            <div class="form-row split">
+                                <div class="form-group">
+                                    <label for="sg-window">SG Window size</label>
+                                    <input type="number" id="sg-window" min="5" max="51" step="2" value="11" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sg-poly">SG Polynomial Degree</label>
+                                    <input type="number" id="sg-poly" min="1" max="5" value="2" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Moving Average Settings -->
+                        <div class="smoothing-settings hidden" id="moving-avg-settings">
+                            <div class="form-group">
+                                <label for="ma-window">MA Window size</label>
+                                <input type="number" id="ma-window" min="3" max="51" step="2" value="5" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plot Configuration Card -->
+                <div class="card glass-card display-config-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-eye text-accent-cyan"></i> Display Configuration</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row toggle-row mb-4">
+                            <label class="switch-label">
+                                <span class="label-primary">Stack Mode View</span>
+                                <span class="label-secondary">Separate curves vertically</span>
+                            </label>
+                            <label class="switch">
+                                <input type="checkbox" id="chk-stack-mode">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-row hidden" id="stack-offset-container">
+                            <div class="slider-header">
+                                <span class="slider-title">Cascade Stack Offset Offset</span>
+                                <span class="slider-val" id="lbl-stack-offset">0.15</span>
+                            </div>
+                            <input type="range" id="rng-stack-offset" min="0.05" max="0.80" step="0.05" value="0.15" class="input-slider">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Peak & Band Detection Card -->
+                <div class="card glass-card peak-detection-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-arrow-down-up-lock text-accent-green"></i> Peak & Band Detection</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-4">
+                            <label for="sel-peak-type">Target Detection</label>
+                            <select id="sel-peak-type" class="form-input">
+                                <option value="valleys" selected>Valleys (Absorption Overtones)</option>
+                                <option value="peaks">Peaks (Reflectance Maxima)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="slider-header">
+                                <span class="slider-title">Sensitivity (Threshold Factor)</span>
+                                <span class="slider-val" id="lbl-threshold">0.30</span>
+                            </div>
+                            <input type="range" id="rng-threshold" min="0.05" max="0.80" step="0.05" value="0.30" class="input-slider">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Spectra & Table Output Column -->
+            <section class="results-column">
+                
+                <!-- Spectral Plot Card -->
+                <div class="card glass-card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-chart-line text-accent-cyan"></i> Preprocessed Spectrum Viewer</h2>
+                        <div class="header-actions">
+                            <button id="btn-save-plot-png" class="btn btn-secondary btn-xs" style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                                <i class="fa-solid fa-image text-accent-cyan"></i> Save Image
+                            </button>
+                            <button id="btn-export-processed-csv" class="btn btn-secondary btn-xs" style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                                <i class="fa-solid fa-file-csv text-accent-green"></i> Export Data
+                            </button>
+                            <span id="lbl-chart-mode" class="badge-status-sec">Mode: Overlay</span>
+                        </div>
+                    </div>
+                    <div class="card-body chart-body">
+                        <div class="chart-container">
+                            <canvas id="spectrumChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Molecular Band Assignments Table -->
+                <div class="card glass-card assignments-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-flask text-accent-green"></i> Detected NIR Band Assignments</h2>
+                    </div>
+                    <div class="card-body assignments-body">
+                        <div class="table-container">
+                            <table class="premium-table" id="bands-table">
+                                <thead>
+                                    <tr>
+                                        <th>Spectrum File</th>
+                                        <th>Wavelength (nm)</th>
+                                        <th>Processed Value</th>
+                                        <th>Bond/Molecule</th>
+                                        <th>Potential Assignment Significance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="empty-row-placeholder">
+                                        <td colspan="5">Select spectra and enable band detection to view molecular assignments.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script imports -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

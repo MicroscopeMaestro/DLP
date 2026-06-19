@@ -1,2 +1,5 @@
 *.o
 __pycache__
+*.pyc
+*.csv
+.ipynb_checkpoints/

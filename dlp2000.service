@@ -1,0 +1,11 @@
+[Unit]
+Description=DLP2000EVM Display-Initialisierung
+After=graphical.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dlp2000_init.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

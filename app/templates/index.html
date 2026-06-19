@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TI DLP NIRscan Nano Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar or Header Panel -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <div class="logo-text">
+                    <h1>NIRscan Nano</h1>
+                    <span class="logo-tagline">Advanced Spectroscopy Interface</span>
+                </div>
+            </div>
+            <div class="header-status-group">
+                <div id="connection-status" class="status-badge status-disconnected">
+                    <span class="status-dot"></span>
+                    <span id="status-text">Disconnected</span>
+                </div>
+                <button id="btn-reconnect" class="btn btn-secondary btn-icon-only" title="Reconnect to Hardware">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Side Controls Panel -->
+            <section class="controls-column">
+                
+                <!-- System Security & Watchdog Panel -->
+                <div class="card glass-card watchdog-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-shield-halved text-accent-cyan"></i> Security & Auto-Standby</h2>
+                        <span class="badge-status-sec" id="watchdog-timer-badge">Auto-Secure Active</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="section-description">Ensures the system powers down the lamp and enters a safe sleep state during inactivity to preserve bulb lifetime and power.</p>
+                        
+                        <div class="form-row toggle-row">
+                            <label class="switch-label">
+                                <span class="label-primary">Watchdog Auto-Secure</span>
+                                <span class="label-secondary">Turn off lamp and sleep on idle</span>
+                            </label>
+                            <label class="switch">
+                                <input type="checkbox" id="chk-watchdog" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-row timer-slider-row">
+                            <div class="slider-header">
+                                <span class="slider-title">Inactivity Timeout</span>
+                                <span class="slider-val" id="lbl-timeout">180s</span>
+                            </div>
+                            <input type="range" id="rng-timeout" min="30" max="600" step="10" value="180" class="input-slider">
+                        </div>
+
+                        <div class="form-row toggle-row border-top pt-3">
+                            <label class="switch-label">
+                                <span class="label-primary">Allow Hibernation</span>
+                                <span class="label-secondary">Let device sleep when inactive</span>
+                            </label>
+                            <label class="switch">
+                                <input type="checkbox" id="chk-hibernate">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="watchdog-footer">
+                            <div class="countdown-group">
+                                <i class="fa-regular fa-clock"></i>
+                                <span>Securing in: <strong id="lbl-countdown">180s</strong></span>
+                            </div>
+                            <button id="btn-secure" class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-power-off"></i> Secure Standby
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan Configuration Panel -->
+                <div class="card glass-card config-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-sliders text-accent-purple"></i> Scan Parameters</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row split">
+                            <div class="form-group">
+                                <label for="sel-scan-type">Scan Patterns</label>
+                                <select id="sel-scan-type" class="form-input">
+                                    <option value="1" selected>Hadamard Patterns</option>
+                                    <option value="0">Column Patterns</option>
+                                    <option value="2">Slew (Hadamard Custom Exp.)</option>
+                                    <option value="3">Slew (Column Custom Exp.)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="num-repeats">Scans for Average</label>
+                                <input type="number" id="num-repeats" min="1" max="100" value="6" class="form-input">
+                            </div>
+                        </div>
+
+                        <!-- Custom Exposure Selection for Slew Scan -->
+                        <div class="form-row" id="row-exposure-time" style="display: none;">
+                            <div class="form-group">
+                                <label for="exposure-time">Pattern Exposure Time</label>
+                                <select id="exposure-time" class="form-input">
+                                    <option value="0">635 µs</option>
+                                    <option value="1" selected>1.27 ms (Default)</option>
+                                    <option value="2">2.45 ms</option>
+                                    <option value="3">5.08 ms</option>
+                                    <option value="4">15.24 ms</option>
+                                    <option value="5">30.48 ms</option>
+                                    <option value="6">60.96 ms</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row split">
+                            <div class="form-group">
+                                <label for="wavelength-start">Wavelength Start (nm)</label>
+                                <input type="number" id="wavelength-start" min="900" max="1700" value="900" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="wavelength-end">Wavelength End (nm)</label>
+                                <input type="number" id="wavelength-end" min="900" max="1700" value="1700" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-row split">
+                            <div class="form-group">
+                                <label for="num-patterns">Total Patterns</label>
+                                <input type="number" id="num-patterns" min="10" max="600" value="228" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="width-px">Slit Width (pixels)</label>
+                                <input type="number" id="width-px" min="1" max="24" value="7" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pga-gain">PGA Gain (ADC Sens.)</label>
+                                <select id="pga-gain" class="form-input">
+                                    <option value="1" selected>1x Gain</option>
+                                    <option value="2">2x Gain</option>
+                                    <option value="4">4x Gain</option>
+                                    <option value="8">8x Gain</option>
+                                    <option value="16">16x Gain</option>
+                                    <option value="32">32x Gain</option>
+                                    <option value="64">64x Gain</option>
+                                    <option value="0">Auto Gain</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button id="btn-save-config" class="btn btn-secondary w-full">
+                            <i class="fa-solid fa-floppy-disk"></i> Apply Parameters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hardware Operations Panel -->
+                <div class="card glass-card operations-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-bolt text-accent-yellow"></i> Operation Controls</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row toggle-row mb-4">
+                            <label class="switch-label">
+                                <span class="label-primary">Lamp Manual Toggle</span>
+                                <span class="label-secondary">Force infrared lamp ON or OFF</span>
+                            </label>
+                            <label class="switch">
+                                <input type="checkbox" id="chk-lamp">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-row toggle-row mb-4 border-top pt-3">
+                            <label class="switch-label">
+                                <span class="label-primary">Smart Auto-Lamp</span>
+                                <span class="label-secondary">Turn lamp on/off during scan</span>
+                            </label>
+                            <label class="switch">
+                                <input type="checkbox" id="chk-auto-lamp" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-row warmup-row mb-4" id="warmup-setting-group">
+                            <div class="slider-header">
+                                <span class="slider-title">Lamp Warmup Duration</span>
+                                <span class="slider-val" id="lbl-warmup">3.0s</span>
+                            </div>
+                            <input type="range" id="rng-warmup" min="0.5" max="10.0" step="0.5" value="3.0" class="input-slider">
+                        </div>
+
+                        <button id="btn-scan" class="btn btn-primary btn-lg w-full">
+                            <span id="btn-scan-text"><i class="fa-solid fa-play"></i> Initiate Spectrum Scan</span>
+                            <span id="btn-scan-loader" class="hidden"><i class="fa-solid fa-circle-notch fa-spin"></i> Scanning...</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Side Results Panel -->
+            <section class="results-column">
+                
+                <!-- Real-time Telemetry Widgets -->
+                <div class="telemetry-row">
+                    <div class="telemetry-widget glass-card">
+                        <div class="widget-icon bg-opacity-purple">
+                            <i class="fa-solid fa-temperature-three-quarters text-accent-purple"></i>
+                        </div>
+                        <div class="widget-data">
+                            <span class="widget-label">System Temp</span>
+                            <span class="widget-value" id="val-temp-system">--.- °C</span>
+                        </div>
+                    </div>
+                    
+                    <div class="telemetry-widget glass-card">
+                        <div class="widget-icon bg-opacity-cyan">
+                            <i class="fa-solid fa-droplet text-accent-cyan"></i>
+                        </div>
+                        <div class="widget-data">
+                            <span class="widget-label">Humidity</span>
+                            <span class="widget-value" id="val-humidity">--.- %</span>
+                        </div>
+                    </div>
+
+                    <div class="telemetry-widget glass-card">
+                        <div class="widget-icon bg-opacity-yellow">
+                            <i class="fa-solid fa-gauge-high text-accent-yellow"></i>
+                        </div>
+                        <div class="widget-data">
+                            <span class="widget-label">ADC PGA Gain</span>
+                            <span class="widget-value" id="val-pga-gain">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spectrum Visualizer Card -->
+                <div class="card glass-card chart-card">
+                    <div class="card-header chart-header">
+                        <h2><i class="fa-solid fa-chart-line text-accent-cyan"></i> Spectrum Viewer</h2>
+                        <div class="chart-tab-group">
+                            <button id="tab-reflectance" class="tab-btn active">Reflectance</button>
+                            <button id="tab-reconstructed" class="tab-btn">Reconstructed Intensity</button>
+                        </div>
+                    </div>
+                    <div class="card-body chart-body">
+                        <div class="chart-container">
+                            <canvas id="spectrumChart"></canvas>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="scan-info-strip">
+                                <span id="val-scan-timestamp"><i class="fa-regular fa-clock"></i> No scan data yet</span>
+                                <span id="val-data-points"></span>
+                            </div>
+                            <button id="btn-export-csv" class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa-solid fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Logger Card -->
+                <div class="card glass-card logger-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-terminal text-accent-green"></i> Activity logs</h2>
+                        <button id="btn-clear-logs" class="btn btn-secondary btn-xs">Clear Logs</button>
+                    </div>
+                    <div class="card-body logger-body" id="log-terminal">
+                        <div class="log-entry log-system">System Ready. Please connect the device to begin...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script imports -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
