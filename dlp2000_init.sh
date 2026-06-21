@@ -8,11 +8,11 @@ sleep 2
 # On RPi5 the bus name is the DT node address (e.g. 400000002.i2c), not "gpio"
 find_gpio_i2c_bus() {
     local name_file name bus_num
-    # 1. Check /sys/class/i2c-dev first (independent of dmesg, works at boot)
+    # 1. Search for 'i2c-gpio' software bus first
     for name_file in /sys/class/i2c-dev/i2c-*/name; do
         if [ -f "$name_file" ]; then
             name=$(cat "$name_file")
-            if [[ "$name" == *"400000002.i2c"* || "$name" == *"i2c-gpio"* ]]; then
+            if [[ "$name" == *"i2c-gpio"* ]]; then
                 bus_num=$(basename "$(dirname "$name_file")" | cut -d'-' -f2)
                 echo "$bus_num"
                 return 0
@@ -20,11 +20,11 @@ find_gpio_i2c_bus() {
         fi
     done
 
-    # 2. Check /sys/bus/i2c/devices/i2c-*/name
-    for name_file in /sys/bus/i2c/devices/i2c-*/name; do
+    # 2. Search for any '*00000002.i2c' bus name
+    for name_file in /sys/class/i2c-dev/i2c-*/name; do
         if [ -f "$name_file" ]; then
             name=$(cat "$name_file")
-            if [[ "$name" == *"400000002.i2c"* || "$name" == *"i2c-gpio"* ]]; then
+            if [[ "$name" =~ [0-9]+00000002\.i2c ]]; then
                 bus_num=$(basename "$(dirname "$name_file")" | cut -d'-' -f2)
                 echo "$bus_num"
                 return 0
@@ -32,8 +32,11 @@ find_gpio_i2c_bus() {
         fi
     done
 
-    # 3. Fallback: check if /dev/i2c-4 exists
-    if [ -e /dev/i2c-4 ]; then
+    # 3. Fallback: check if /dev/i2c-5 or /dev/i2c-4 exists
+    if [ -e /dev/i2c-5 ]; then
+        echo "5"
+        return 0
+    elif [ -e /dev/i2c-4 ]; then
         echo "4"
         return 0
     fi
@@ -56,12 +59,15 @@ echo "DLP2000EVM on i2c-$BUS_NUM — starting initialization..."
 i2cset -y "$BUS_NUM" $I2C_ADDR 0xa3 0x00 0x00 0x00 0x01 i
 
 # 2. Set input source to parallel DPI (640x360, nHD)
-i2cset -y "$BUS_NUM" $I2C_ADDR 0x0c 0x00 0x00 0x00 0x1B i
+i2cset -y "$BUS_NUM" $I2C_ADDR 0x0c 0x00 0x00 0x00 0x1b i
 
-# 3. Enable display output
+# 3. Set pixel format to RGB666
+i2cset -y "$BUS_NUM" $I2C_ADDR 0x0d 0x00 0x00 0x00 0x01 i
+
+# 4. Enable display output
 i2cset -y "$BUS_NUM" $I2C_ADDR 0x0b 0x00 0x00 0x00 0x00 i
 
-# 4. Unfreeze display buffer (projection begins)
+# 5. Unfreeze display buffer (projection begins)
 i2cset -y "$BUS_NUM" $I2C_ADDR 0xa3 0x00 0x00 0x00 0x00 i
 
 echo "DLP2000EVM initialized on bus $BUS_NUM."

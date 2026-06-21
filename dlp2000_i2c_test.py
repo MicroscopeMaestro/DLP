@@ -22,11 +22,13 @@ def find_gpio_i2c_bus():
         try:
             with open(name_file) as f:
                 name = f.read().strip()
-            if "gpio" in name.lower() or "400000002.i2c" in name.lower():
+            if "gpio" in name.lower() or "00000002.i2c" in name.lower():
                 return int(entry.split("-")[1])
         except (IOError, ValueError, IndexError):
             continue
-    # Fallback to bus 4 if it exists (standard for DLP2000 overlay configuration)
+    # Fallback to bus 5 or 4 if they exist
+    if os.path.exists("/dev/i2c-5"):
+        return 5
     if os.path.exists("/dev/i2c-4"):
         return 4
     return None

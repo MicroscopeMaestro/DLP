@@ -6,7 +6,28 @@ Tries two read protocols: repeated-start vs separate transactions.
 import smbus2
 import time
 
-bus = smbus2.SMBus(4)
+def find_gpio_i2c_bus():
+    import os
+    base = "/sys/class/i2c-dev"
+    if not os.path.exists(base):
+        return 5
+    for entry in sorted(os.listdir(base)):
+        name_file = os.path.join(base, entry, "name")
+        try:
+            with open(name_file) as f:
+                name = f.read().strip()
+            if "i2c-gpio" in name.lower() or "00000002.i2c" in name.lower():
+                return int(entry.split("-")[1])
+        except Exception:
+            continue
+    if os.path.exists("/dev/i2c-5"):
+        return 5
+    if os.path.exists("/dev/i2c-4"):
+        return 4
+    return 5
+
+bus_num = find_gpio_i2c_bus()
+bus = smbus2.SMBus(bus_num)
 addr = 0x1B
 
 def rd_repstart(reg, n):
