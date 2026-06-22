@@ -1,0 +1,62 @@
+================================================================================
+DLP2000 EVM to Raspberry Pi 5 Standard Pin Connections (18-bit DPI RGB666 Mode)
+================================================================================
+
+This file contains the correct, standard pin mapping required to interface the
+DLPDLCR2000EVM projector with the Raspberry Pi 5 under RGB666 mode with correct colors.
+
+--------------------------------------------------------------------------------
+1. Control, Power & I2C Pins
+--------------------------------------------------------------------------------
+| DLP Pin | DLP Signal Name | RPi Physical Pin | RPi BCM / GPIO | Function |
+|---|---|---|---|---|
+| **P2: Pin 3** | VINTF (Logic Ref) | **Pin 1** (3.3V) | 3.3V | I/O Logic Ref Voltage |
+| **J3: Pin 1** | +5V Main Power | **Pin 2** (5V) | 5V | EVM Board Power |
+| **P2: Pin 46** | GND (Ground) | **Pin 6** (GND) | GND | Common Ground |
+| **P1: Pin 27** | LCD_VSYNC | **Pin 3** | **GPIO 2** | Vertical Sync |
+| **P1: Pin 29** | LCD_HSYNC | **Pin 5** | **GPIO 3** | Horizontal Sync |
+| **P1: Pin 28** | LCD_PCLK | **Pin 27** | **GPIO 0** | Pixel Clock |
+| **P1: Pin 30** | LCD_AC_BIAS / DE | **Pin 28** | **GPIO 1** | Data Enable |
+| **P2: Pin 20** | I2C2_SDA | **Pin 16** | **GPIO 23** | Software I2C SDA |
+| **P2: Pin 19** | I2C2_SCL | **Pin 18** | **GPIO 24** | Software I2C SCL |
+
+--------------------------------------------------------------------------------
+2. Blue Channel Pins
+--------------------------------------------------------------------------------
+| DLP Pin | DLP Signal Name | RPi Physical Pin | RPi BCM / GPIO | Color Bit |
+|---|---|---|---|---|
+| **P1: Pin 45** | LCD_DATA0 | **Pin 7** | **GPIO 4** | Blue 0 (LSB) |
+| **P1: Pin 46** | LCD_DATA1 | **Pin 29** | **GPIO 5** | Blue 1 |
+| **P1: Pin 43** | LCD_DATA2 | **Pin 31** | **GPIO 6** | Blue 2 |
+| **P1: Pin 44** | LCD_DATA3 | **Pin 26** | **GPIO 7** | Blue 3 |
+| **P1: Pin 41** | LCD_DATA4 | **Pin 24** | **GPIO 8** | Blue 4 |
+| **P1: Pin 42** | LCD_DATA5 | **Pin 21** | **GPIO 9** | Blue 5 (MSB) |
+
+--------------------------------------------------------------------------------
+3. Green Channel Pins
+--------------------------------------------------------------------------------
+| DLP Pin | DLP Signal Name | RPi Physical Pin | RPi BCM / GPIO | Color Bit |
+|---|---|---|---|---|
+| **P1: Pin 39** | LCD_DATA6 | **Pin 19** | **GPIO 10** | Green 0 (LSB) |
+| **P1: Pin 40** | LCD_DATA7 | **Pin 23** | **GPIO 11** | Green 1 |
+| **P1: Pin 37** | LCD_DATA8 | **Pin 32** | **GPIO 12** | Green 2 |
+| **P1: Pin 38** | LCD_DATA9 | **Pin 33** | **GPIO 13** | Green 3 |
+| **P1: Pin 36** | LCD_DATA10 | **Pin 8** | **GPIO 14** | Green 4 |
+| **P1: Pin 34** | LCD_DATA11 | **Pin 10** | **GPIO 15** | Green 5 (MSB) |
+
+--------------------------------------------------------------------------------
+4. Red Channel Pins
+--------------------------------------------------------------------------------
+| DLP Pin | DLP Signal Name | RPi Physical Pin | RPi BCM / GPIO | Color Bit |
+|---|---|---|---|---|
+| **P1: Pin 35** | LCD_DATA12 | **Pin 36** | **GPIO 16** | Red 0 (LSB) |
+| **P1: Pin 33** | LCD_DATA13 | **Pin 11** | **GPIO 17** | Red 1 |
+| **P1: Pin 31** | LCD_DATA14 | **Pin 12** | **GPIO 18** | Red 2 |
+| **P1: Pin 32** | LCD_DATA15 | **Pin 35** | **GPIO 19** | Red 3 |
+| **P1: Pin 15** | LCD_DATA16 | **Pin 38** | **GPIO 20** | Red 4 |
+| **P1: Pin 16** | LCD_DATA17 | **Pin 40** | **GPIO 21** | Red 5 (MSB) |
+
+================================================================================
+Note on evaluation headers: On both headers (P1/P2), pins are arranged with 
+odd-numbered pins on one side and even-numbered pins directly opposite them.
+================================================================================

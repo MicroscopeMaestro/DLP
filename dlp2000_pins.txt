@@ -1,0 +1,145 @@
+================================================================================
+DLP2000 EVM to Raspberry Pi 5 GPIO Pin Connections (18-bit DPI RGB666 Mode)
+================================================================================
+
+This file documents the physical connections between the 40-pin header on the 
+Raspberry Pi 5 and the dual 46-pin headers (P1 and P2) on the DLPDLCR2000EVM.
+
+--------------------------------------------------------------------------------
+OPTION A: Sequential Pi 5 Header Order (Recommended for Wiring)
+--------------------------------------------------------------------------------
+Start at Pin 1 on the Raspberry Pi and work your way down the header pin-by-pin.
+This prevents you from having to jump back and forth.
+
+Pins 1 to 12 (Top Left/Right of Pi Header):
+  RPi Pin 1   (3.3V Power)          <---> P2 Pin 3   (VINTF Logic Ref Voltage)
+  RPi Pin 3   (GPIO 2 / VSYNC)      <---> P1 Pin 27  (LCD_VSYNC)
+  RPi Pin 5   (GPIO 3 / HSYNC)      <---> P1 Pin 29  (LCD_HSYNC)
+  RPi Pin 6   (Ground)              <---> P2 Pin 46  (GND Reference)
+  RPi Pin 7   (GPIO 4 / Blue 0 LSB) <---> P1 Pin 45  (LCD_DATA0)
+  RPi Pin 8   (GPIO 14 / Green 4)   <---> P1 Pin 36  (LCD_DATA10)
+  RPi Pin 10  (GPIO 15 / Green 5)   <---> P1 Pin 34  (LCD_DATA11)
+  RPi Pin 11  (GPIO 17 / Red 1)     <---> P1 Pin 33  (LCD_DATA13)
+  RPi Pin 12  (GPIO 18 / Red 2)     <---> P1 Pin 31  (LCD_DATA14)
+
+Pins 16 to 29 (Middle of Pi Header):
+  RPi Pin 16  (GPIO 23 / I2C SDA)   <---> P2 Pin 20  (I2C2_SDA)
+  RPi Pin 18  (GPIO 24 / I2C SCL)   <---> P2 Pin 19  (I2C2_SCL)
+  RPi Pin 19  (GPIO 10 / Green 0)   <---> P1 Pin 39  (LCD_DATA6)
+  RPi Pin 21  (GPIO 9 / Blue 5 MSB) <---> P1 Pin 42  (LCD_DATA5)
+  RPi Pin 23  (GPIO 11 / Green 1)   <---> P1 Pin 40  (LCD_DATA7)
+  RPi Pin 24  (GPIO 8 / Blue 4)     <---> P1 Pin 41  (LCD_DATA4)
+  RPi Pin 26  (GPIO 7 / Blue 3)     <---> P1 Pin 44  (LCD_DATA3)
+  RPi Pin 27  (GPIO 0 / Pixel Clk)  <---> P1 Pin 28  (LCD_PCLK)
+  RPi Pin 28  (GPIO 1 / Data Enable)<---> P1 Pin 30  (LCD_AC_BIAS / DE)
+  RPi Pin 29  (GPIO 5 / Blue 1)     <---> P1 Pin 46  (LCD_DATA1)
+
+Pins 31 to 40 (Bottom of Pi Header):
+  RPi Pin 31  (GPIO 6 / Blue 2)     <---> P1 Pin 43  (LCD_DATA2)
+  RPi Pin 32  (GPIO 12 / Green 2)   <---> P1 Pin 37  (LCD_DATA8)
+  RPi Pin 33  (GPIO 13 / Green 3)   <---> P1 Pin 38  (LCD_DATA9)
+  RPi Pin 35  (GPIO 19 / Red 3)     <---> P1 Pin 32  (LCD_DATA15)
+  RPi Pin 36  (GPIO 16 / Red 0 LSB) <---> P1 Pin 35  (LCD_DATA12)
+  RPi Pin 38  (GPIO 20 / Red 4)     <---> P1 Pin 15  (LCD_DATA16)
+  RPi Pin 40  (GPIO 21 / Red 5 MSB) <---> P1 Pin 16  (LCD_DATA17)
+
+--------------------------------------------------------------------------------
+OPTION B: Grouped by DLP2000 Board Connector
+--------------------------------------------------------------------------------
+If you prefer to wire one side of the DLP2000 board at a time, use this list.
+
+1. Connector P2 (Right-Side Connector) - Control & Power (4 wires total):
+  DLP2000 P2 Pin 3   (VINTF)        <---> RPi Pin 1   (3.3V Reference Voltage)
+  DLP2000 P2 Pin 19  (I2C SCL)      <---> RPi Pin 18  (GPIO 24 I2C SCL)
+  DLP2000 P2 Pin 20  (I2C SDA)      <---> RPi Pin 16  (GPIO 23 I2C SDA)
+  DLP2000 P2 Pin 46  (GND)          <---> RPi Pin 6   (GND Ground)
+
+2. Connector P1 (Left-Side Connector) - Video & Sync Signals (22 wires total):
+  DLP2000 P1 Pin 15  (LCD_DATA16)   <---> RPi Pin 38  (GPIO 20 Red 4)
+  DLP2000 P1 Pin 16  (LCD_DATA17)   <---> RPi Pin 40  (GPIO 21 Red 5 MSB)
+  DLP2000 P1 Pin 27  (LCD_VSYNC)    <---> RPi Pin 3   (GPIO 2 VSYNC)
+  DLP2000 P1 Pin 28  (LCD_PCLK)     <---> RPi Pin 27  (GPIO 0 PCLK)
+  DLP2000 P1 Pin 29  (LCD_HSYNC)    <---> RPi Pin 5   (GPIO 3 HSYNC)
+  DLP2000 P1 Pin 30  (LCD_AC_BIAS)  <---> RPi Pin 28  (GPIO 1 DE)
+  DLP2000 P1 Pin 31  (LCD_DATA14)   <---> RPi Pin 12  (GPIO 18 Red 2)
+  DLP2000 P1 Pin 32  (LCD_DATA15)   <---> RPi Pin 35  (GPIO 19 Red 3)
+  DLP2000 P1 Pin 33  (LCD_DATA13)   <---> RPi Pin 11  (GPIO 17 Red 1)
+  DLP2000 P1 Pin 34  (LCD_DATA11)   <---> RPi Pin 10  (GPIO 15 Green 5 MSB)
+  DLP2000 P1 Pin 35  (LCD_DATA12)   <---> RPi Pin 36  (GPIO 16 Red 0 LSB)
+  DLP2000 P1 Pin 36  (LCD_DATA10)   <---> RPi Pin 8   (GPIO 14 Green 4)
+  DLP2000 P1 Pin 37  (LCD_DATA8)    <---> RPi Pin 32  (GPIO 12 Green 2)
+  DLP2000 P1 Pin 38  (LCD_DATA9)    <---> RPi Pin 33  (GPIO 13 Green 3)
+  DLP2000 P1 Pin 39  (LCD_DATA6)    <---> RPi Pin 19  (GPIO 10 Green 0 LSB)
+  DLP2000 P1 Pin 40  (LCD_DATA7)    <---> RPi Pin 23  (GPIO 11 Green 1)
+  DLP2000 P1 Pin 41  (LCD_DATA4)    <---> RPi Pin 24  (GPIO 8 Blue 4)
+  DLP2000 P1 Pin 42  (LCD_DATA5)    <---> RPi Pin 21  (GPIO 9 Blue 5 MSB)
+  DLP2000 P1 Pin 43  (LCD_DATA2)    <---> RPi Pin 31  (GPIO 6 Blue 2)
+  DLP2000 P1 Pin 44  (LCD_DATA3)    <---> RPi Pin 26  (GPIO 7 Blue 3)
+  DLP2000 P1 Pin 45  (LCD_DATA0)    <---> RPi Pin 7   (GPIO 4 Blue 0 LSB)
+  DLP2000 P1 Pin 46  (LCD_DATA1)    <---> RPi Pin 29  (GPIO 5 Blue 1)
+
+================================================================================
+OPTION C: User's Custom Pin-to-Pin Matrix (Currently Connected)
+================================================================================
+This is the physical connection matrix currently wired on your setup:
+
+1. Control, Power & I2C:
+  RPi Pin 1  (3.3V VINTF)          <---> P2 Pin 3   (VINTF Ref Voltage)
+  RPi Pin 2  (5V Main Power)       <---> J3 Pin 1   (5V Power Input)
+  RPi Pin 3  (GPIO 2 / VSYNC)      <---> P1 Pin 27  (LCD_VSYNC)
+  RPi Pin 5  (GPIO 3 / HSYNC)      <---> P1 Pin 29  (LCD_HSYNC)
+  RPi Pin 27 (GPIO 0 / Pixel Clk)  <---> P1 Pin 28  (LCD_PCLK)
+  RPi Pin 28 (GPIO 1 / Data Enable)<---> P1 Pin 30  (LCD_AC_BIAS / DE)
+  RPi Pin 16 (GPIO 23 / I2C SDA)   <---> P2 Pin 20  (I2C2_SDA)
+  RPi Pin 18 (GPIO 24 / I2C SCL)   <---> P2 Pin 19  (I2C2_SCL)
+
+2. Blue Channel (100% correct, matches standard):
+  RPi Pin 7  (GPIO 4 / Blue 0)     <---> P1 Pin 45  (LCD_DATA0 / Blue 0)
+  RPi Pin 29 (GPIO 5 / Blue 1)     <---> P1 Pin 46  (LCD_DATA1 / Blue 1)
+  RPi Pin 31 (GPIO 6 / Blue 2)     <---> P1 Pin 43  (LCD_DATA2 / Blue 2)
+  RPi Pin 26 (GPIO 7 / Blue 3)     <---> P1 Pin 44  (LCD_DATA3 / Blue 3)
+  RPi Pin 24 (GPIO 8 / Blue 4)     <---> P1 Pin 41  (LCD_DATA4 / Blue 4)
+  RPi Pin 21 (GPIO 9 / Blue 5)     <---> P1 Pin 42  (LCD_DATA5 / Blue 5)
+
+3. Green Channel (Scrambled with Red):
+  RPi Pin 19 (GPIO 10 / Green 0)   <---> P1 Pin 36  (LCD_DATA10 / Green 4)
+  RPi Pin 23 (GPIO 11 / Green 1)   <---> P1 Pin 34  (LCD_DATA11 / Green 5)
+  RPi Pin 32 (GPIO 12 / Green 2)   <---> P1 Pin 35  (LCD_DATA12 / Red 0)
+  RPi Pin 33 (GPIO 13 / Green 3)   <---> P1 Pin 33  (LCD_DATA13 / Red 1)
+  RPi Pin 8  (GPIO 14 / Green 4)   <---> P1 Pin 31  (LCD_DATA14 / Red 2)
+  RPi Pin 10 (GPIO 15 / Green 5)   <---> P1 Pin 32  (LCD_DATA15 / Red 3)
+
+4. Red Channel (Scrambled with Green):
+  RPi Pin 36 (GPIO 16 / Red 0)     <---> P1 Pin 15  (LCD_DATA16 / Red 4)
+  RPi Pin 11 (GPIO 17 / Red 1)     <---> P1 Pin 16  (LCD_DATA17 / Red 5)
+  RPi Pin 12 (GPIO 18 / Red 2)     <---> P1 Pin 37  (LCD_DATA8 / Green 2)
+  RPi Pin 35 (GPIO 19 / Red 3)     <---> P1 Pin 38  (LCD_DATA9 / Green 3)
+  RPi Pin 38 (GPIO 20 / Red 4)     <---> P1 Pin 39  (LCD_DATA6 / Green 0)
+  RPi Pin 40 (GPIO 21 / Red 5)     <---> P1 Pin 40  (LCD_DATA7 / Green 1)
+
+--------------------------------------------------------------------------------
+REWIRE GUIDE: How to Restore Standard Colors (Option A/B)
+--------------------------------------------------------------------------------
+To display the standard Linux desktop correctly (without software hacks), you
+must rewire the scrambled Red and Green signals on the P1 connector as follows:
+
+DLP Pin    | DLP Signal Name   | Current RPi GPIO | Target RPi GPIO (Standard)
+-----------|-------------------|------------------|---------------------------
+P1 Pin 39  | LCD_DATA6 (G0)    | BCM 20 (Pin 38)  | BCM 10 (Pin 19)
+P1 Pin 40  | LCD_DATA7 (G1)    | BCM 21 (Pin 40)  | BCM 11 (Pin 23)
+P1 Pin 37  | LCD_DATA8 (G2)    | BCM 18 (Pin 12)  | BCM 12 (Pin 32)
+P1 Pin 38  | LCD_DATA9 (G3)    | BCM 19 (Pin 35)  | BCM 13 (Pin 33)
+P1 Pin 36  | LCD_DATA10 (G4)   | BCM 10 (Pin 19)  | BCM 14 (Pin 8)
+P1 Pin 34  | LCD_DATA11 (G5)   | BCM 11 (Pin 23)  | BCM 15 (Pin 10)
+P1 Pin 35  | LCD_DATA12 (R0)   | BCM 12 (Pin 32)  | BCM 16 (Pin 36)
+P1 Pin 33  | LCD_DATA13 (R1)   | BCM 13 (Pin 33)  | BCM 17 (Pin 11)
+P1 Pin 31  | LCD_DATA14 (R2)   | BCM 14 (Pin 8)   | BCM 18 (Pin 12)
+P1 Pin 32  | LCD_DATA15 (R3)   | BCM 15 (Pin 10)  | BCM 19 (Pin 35)
+P1 Pin 15  | LCD_DATA16 (R4)   | BCM 16 (Pin 36)  | BCM 20 (Pin 38)
+P1 Pin 16  | LCD_DATA17 (R5)   | BCM 17 (Pin 11)  | BCM 21 (Pin 40)
+
+================================================================================
+Note on evaluation headers: On both headers (P1/P2), pins are arranged with 
+odd-numbered pins on one side and even-numbered pins directly opposite them.
+================================================================================
+
